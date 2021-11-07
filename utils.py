@@ -74,7 +74,7 @@ class Passage_Embedding:
 
     def get_corpus(self):
         with open(self.wiki_path, "r", encoding="utf-8") as f:
-            wiki = json.load()
+            wiki = json.load(f)
 
         corpus = list(
             dict.fromkeys([v["text"] for v in wiki.values()])

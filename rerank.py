@@ -6,6 +6,7 @@ from datasets import load_from_disk
 from transformers import AutoTokenizer
 
 from utils import Passage_Embedding
+from encoder import BertEncoder_For_BiEncoder, RoBertaEncoder_For_CrossEncoder
 
 
 class Retrieve_By_BiEncoder:
@@ -157,6 +158,9 @@ def rerank(queries, c_encoder, doc_indices):
 
 
 if __name__ == "__main__":
+
+    # q_encoder & p_encoder are called only when BertEncoder is defined.
+    BertEncoder = BertEncoder_For_BiEncoder
     p_encoder = torch.load("/save_directory/p_encoder.pt")
     q_encoder = torch.load("/save_directory/q_encoder.pt")
     wiki_path = "/save_directory/wiki_data.json"
@@ -186,6 +190,9 @@ if __name__ == "__main__":
     print("BiEncoder Retrieval Accuracy:", biencoder_retrieval_acc)
 
     # Cross-Encoder Retrieval (Re-Ranking)
+    # c_encoder is called only when RoBertaEncoder is defined.
+    # (In this process, RobertaEncoder is defined because c_encoder using Roberta is called. If a c_encoder using abert is called, then a BertEncoder is defined.)
+    RoBertaEncoder = RoBertaEncoder_For_CrossEncoder
     c_encoder = torch.load("/save_directory/c_encoder.pt")
     result_scores, result_indices = rerank(queries, c_encoder, doc_indices)
 
