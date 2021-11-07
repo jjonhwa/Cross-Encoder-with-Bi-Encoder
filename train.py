@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 import random
+import torch.nn.functional as F
 
 from tqdm import trange
 from tqdm.auto import tqdm
@@ -56,8 +57,8 @@ def biencoder_train(
     In-batch Negative BiEncoder Train
 
     Arg:
-        queires: pd.Series
-        passages: pd.Series
+        queires: List
+        passages: List
         tokenizer: BertTokenizer
         p_encoder: BertEncoder_For_BiEncoder
         q_encoder: BertEncoder_For_BiEncoder
@@ -225,8 +226,8 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
     In-batch Negative CrossEncoder Train
 
     Arg:
-        queries: pd.Series
-        passages: pd.Series
+        queries: List
+        passages: List
         tokenizer: BertTokenizer or RoBertaTokenizer
         cross_encoder: BertEncoder_For_CrossEncoder or RoBertaEncoder_For_CrossEncoder
         sampler: Sampler
@@ -301,7 +302,7 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
             cross_inputs = {
                 "input_ids": batch[0],
                 "attention_mask": batch[1],
-                # 'token_type_ids' : batch[2] # When you use BertModel, release annotation
+                # 'token_type_ids' : batch[2] # When you use BertModel, Unannotate it
             }
             for k in cross_inputs.keys():
                 cross_inputs[k] = cross_inputs[k].tolist()
@@ -309,7 +310,7 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
             # Make In-Batch Negative Sampling
             new_input_ids = []
             new_attention_mask = []
-            # new_token_type_ids = [] # When you use BertModel, release annotation
+            # new_token_type_ids = [] # When you use BertModel, Unannotate it
             for i in range(len(cross_inputs["input_ids"])):
                 sep_index = cross_inputs["input_ids"][i].index(
                     tokenizer.sep_token_id
@@ -318,30 +319,30 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
                 for j in range(len(cross_inputs["input_ids"])):
                     query_id = cross_inputs["input_ids"][i][:sep_index]
                     query_att = cross_inputs["attention_mask"][i][:sep_index]
-                    # query_tok = cross_inputs['token_type_ids'][i][:sep_index] # When you use BertModel, release annotation
+                    # query_tok = cross_inputs['token_type_ids'][i][:sep_index] # When you use BertModel, Unannotate it
 
                     context_id = cross_inputs["input_ids"][j][sep_index:]
                     context_att = cross_inputs["attention_mask"][j][sep_index:]
-                    # context_tok = cross_inputs['token_type_ids'][j][sep_index:] # When you use BertModel, release annotation
+                    # context_tok = cross_inputs['token_type_ids'][j][sep_index:] # When you use BertModel, Unannotate it
                     query_id.extend(context_id)
                     query_att.extend(context_att)
-                    # query_tok.extend(context_tok) # When you use BertModel, release annotation
+                    # query_tok.extend(context_tok) # When you use BertModel, Unannotate it
                     new_input_ids.append(query_id)
                     new_attention_mask.append(query_att)
-                    # new_token_type_ids.append(query_tok) # When you use BertModel, release annotation
+                    # new_token_type_ids.append(query_tok) # When you use BertModel, Unannotate it
 
             new_input_ids = torch.tensor(new_input_ids)
             new_attention_mask = torch.tensor(new_attention_mask)
-            # new_token_type_ids = torch.tensor(new_token_type_ids) # When you use BertModel, release annotation
+            # new_token_type_ids = torch.tensor(new_token_type_ids) # When you use BertModel, Unannotate it
             if torch.cuda.is_available():
                 new_input_ids = new_input_ids.to("cuda")
                 new_attention_mask = new_attention_mask.to("cuda")
-                # new_attention_mask = new_attention_mask.to('cuda') # When you use BertModel, release annotation
+                # new_attention_mask = new_attention_mask.to('cuda') # When you use BertModel, Unannotate it
 
             change_cross_inputs = {
                 "input_ids": new_input_ids,
                 "attention_mask": new_attention_mask,
-                #'token_type_ids' : new_token_type_ids # When you use BertModel, release annotation
+                #'token_type_ids' : new_token_type_ids # When you use BertModel, Unannotate it
             }
 
             cross_output = cross_encoder(**change_cross_inputs)
@@ -391,7 +392,8 @@ if __name__ == "__main__":
         num_train_epochs=20,
         weight_decay=0.01,
     )
-
+    args.encoder = 'cross'
+    
     set_seed(42)  # magic number :)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
