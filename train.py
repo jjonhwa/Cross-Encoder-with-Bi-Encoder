@@ -2,6 +2,7 @@ import torch
 import numpy as np
 import random
 import torch.nn.functional as F
+import argparse
 
 from tqdm import trange
 from tqdm.auto import tqdm
@@ -383,6 +384,10 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--encoder', type = str, default = 'cross', help = 'Biencoder can be used as the instruction "bi" and crossencoder can be used as the instruction "cross".')
+    sub_args = parser.parse_args()
+
     args = TrainingArguments(
         output_dir="your_output_directory",  # put in your output directory
         evaluation_strategy="epoch",
@@ -392,7 +397,6 @@ if __name__ == "__main__":
         num_train_epochs=20,
         weight_decay=0.01,
     )
-    args.encoder = 'cross'
     
     set_seed(42)  # magic number :)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -402,7 +406,7 @@ if __name__ == "__main__":
     )  # put in your data path, dataset have train/valid dataset
     train_dataset = dataset["train"]
 
-    if args.encoder == "cross":
+    if sub_args.encoder == "cross":
         # you can use 'klue/bert-base' model, and you have to change the code above.
         model_checkpoint = "klue/bert-base"
 
@@ -433,7 +437,7 @@ if __name__ == "__main__":
             c_encoder, "save_directory/c_encoder.pt"
         )  # put in your save directory
 
-    elif args.encoder == "bi":
+    elif sub_args.encoder == "bi":
         # you can use 'klue/bert-base' or 'klue/roberta-large(base)'
         # but, in this code, you just can use 'klue/bert-base' in bi-encoder because I jsut make bertmodel in bi-encoder
         model_checkpoint = "klue/bert-base"
