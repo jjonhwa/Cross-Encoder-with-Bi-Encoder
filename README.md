@@ -47,7 +47,6 @@ For Tok-k passages that have passed through the Bi-Encoder Retrival, ReRank is p
 - Learn crossencoder and biencoder and store them.
 - Modify only the data path to match your data. (find "your_dataset_path")
 ```python
-# If you want to train cross encoder, you can input the configuration for the encoder
 python train.py --encoder 'cross' --output_directory './save_directory/'
 ```
 
