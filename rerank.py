@@ -1,4 +1,5 @@
 import torch
+import os
 import pandas as pd
 
 from tqdm import tqdm
@@ -158,12 +159,15 @@ def rerank(queries, c_encoder, doc_indices):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--input_directory', type = str, default = './save_directory/', help = 'Enter input_directory containing Encoder.')
+    sub_args = parser.parse_args()
 
     # q_encoder & p_encoder are called only when BertEncoder is defined.
     BertEncoder = BertEncoder_For_BiEncoder
-    p_encoder = torch.load("/save_directory/p_encoder.pt")
-    q_encoder = torch.load("/save_directory/q_encoder.pt")
-    wiki_path = "/save_directory/wiki_data.json"
+    p_encoder = torch.load(os.path.join(sub_args.input_directory, 'p_encoder.pt'))
+    q_encoder = torch.load(os.path.join(sub_args.input_directory, 'q_encoder.pt'))
+    wiki_path = os.path.join(sub_args.input_directory, 'wiki_data.json')
 
     model_checkpoint = "klue/bert-base"
     tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
@@ -174,11 +178,12 @@ if __name__ == "__main__":
     )  # get corpus & p_embs
 
     corpus = biencoder_retrieval.corpus
-    dataset = load_from_disk("../data/train_dataset")
+    dataset = load_from_disk("your_dataset_path")
     queries = dataset["validation"][
         "question"
     ]  # dataset has valid/train data and We will calculate the score for the validation set.
-
+       # put in your data path, dataset have train/valid dataset
+       
     doc_scores, doc_indices = biencoder_retrieval.get_relavant_doc(queries, k=500)
     # k usually utilizes 20, 50, and 100, and since this code will re-rank it with a cross encoder,
     # 500 was given to obtain the highest retrival acc.
@@ -193,7 +198,7 @@ if __name__ == "__main__":
     # c_encoder is called only when RoBertaEncoder is defined.
     # (In this process, RobertaEncoder is defined because c_encoder using Roberta is called. If a c_encoder using abert is called, then a BertEncoder is defined.)
     RoBertaEncoder = RoBertaEncoder_For_CrossEncoder
-    c_encoder = torch.load("/save_directory/c_encoder.pt")
+    c_encoder = torch.load(os.path.join(sub_args.input_directory, "c_encoder.pt"))
     result_scores, result_indices = rerank(queries, c_encoder, doc_indices)
 
     # get final Top-k Passages: Here, I just get 50 passage

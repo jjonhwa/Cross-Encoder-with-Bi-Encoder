@@ -434,9 +434,8 @@ if __name__ == "__main__":
             sampler=CustomSampler,
         )
 
-        ce_save_dir = sub_args.output_directory + 'c_encoder.pt'
         torch.save(
-            c_encoder, ce_save_dir
+            c_encoder, os.path.join(sub_args.output_directory, 'c_encoder.pt')
         ) 
 
     elif sub_args.encoder == "bi":
@@ -462,11 +461,9 @@ if __name__ == "__main__":
             overflow=True,
         )
         
-        be_p_save_dir = sub_args.output_directory + 'p_encoder.pt'
-        be_q_save_dir = sub_args.output_directory + 'q_encoder.pt'
         torch.save(
-            p_encoder, be_p_save_dir
+            p_encoder, os.path.join(sub_args.output_directory, 'p_encoder.pt')
         )  
         torch.save(
-            q_encoder, be_q_save_dir
+            q_encoder, os.path.join(sub_args.output_directory, 'q_encoder.pt')
         )  
