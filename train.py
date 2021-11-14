@@ -386,10 +386,11 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--encoder', type = str, default = 'cross', help = 'Biencoder can be used as the instruction "bi" and crossencoder can be used as the instruction "cross".')
+    parser.add_argument('--output_directory', type = str, default = './save_directory/', help = 'Put in your save directory')
     sub_args = parser.parse_args()
 
     args = TrainingArguments(
-        output_dir="your_output_directory",  # put in your output directory
+        output_dir= sub_args.output_directory,
         evaluation_strategy="epoch",
         learning_rate=1e-5,
         per_device_train_batch_size=4,  # if you use bi-encoder, More batch size may be input than crossencoder.
@@ -433,9 +434,10 @@ if __name__ == "__main__":
             sampler=CustomSampler,
         )
 
+        ce_save_dir = sub_args.output_directory + 'c_encoder.pt'
         torch.save(
-            c_encoder, "save_directory/c_encoder.pt"
-        )  # put in your save directory
+            c_encoder, ce_save_dir
+        ) 
 
     elif sub_args.encoder == "bi":
         # you can use 'klue/bert-base' or 'klue/roberta-large(base)'
@@ -459,10 +461,12 @@ if __name__ == "__main__":
             sampler=CustomSampler,
             overflow=True,
         )
-
+        
+        be_p_save_dir = sub_args.output_directory + 'p_encoder.pt'
+        be_q_save_dir = sub_args.output_directory + 'q_encoder.pt'
         torch.save(
-            p_encoder, "save_directory/p_encoder.pt"
-        )  # put in your save directory
+            p_encoder, be_p_save_dir
+        )  
         torch.save(
-            q_encoder, "save_directory/q_encoder.pt"
-        )  # put in your save directory
+            q_encoder, be_q_save_dir
+        )  
