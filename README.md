@@ -19,7 +19,7 @@ For Tok-k passages that have passed through the Bi-Encoder Retrival, ReRank is p
 |Elastic Search|0.852|0.945|0.962|
 |DPR Bi-Encoder|-|0.775|0.85|
 
-3. **ReRank Strategy with CrossEncoder**
+### 3. **ReRank Strategy with CrossEncoder**
 - Our purpose is to bring high performance from KLUE MRC competition to End-to-End from Retrieval to Reader. From this, **the ReRank strategy using Cross Encoder was used.**
 - After extracting the Retrival Passage of the Top-500 using the Bi-Encoder, **only a small number of Passages are finally extracted by returning to the Cross Encoder.**
 - Retrieval Accuracy in our Data
@@ -29,7 +29,7 @@ For Tok-k passages that have passed through the Bi-Encoder Retrival, ReRank is p
 |Elastic Search|0.852|0.945|0.962|
 |DPR with CrossEncoder|0.825|0.95|-|
 
-4. Ensemble
+### 4. Ensemble
 - In this process, the contents of CrossEncoder were mainly written, and the contents of Ensemble were omitted.
 - **An experiment was conducted assuming that performance improvement would be achieved from different types of Retrival combinations by conducting Ensemble using Sparse Embedding and Dense Embedding.**
 - Top-100 was selected using Elastic Search and Top-100 was selected using DPR and Cross Encoder, and the final output score was calculated by combining them 1 to 1 and normalizing them.
