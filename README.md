@@ -27,6 +27,7 @@ For Tok-k passages that have passed through the Bi-Encoder Retrival, ReRank is p
 ||Top-5|Top-50|Top-100|
 |---|---|---|---|
 |Elastic Search|0.852|0.945|0.962|
+|DPR without CrossEncoder|-|0.775|0.85|
 |DPR with CrossEncoder|0.825|0.95|-|
 
 ### 4. Ensemble
