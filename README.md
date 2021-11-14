@@ -49,9 +49,11 @@ For Tok-k passages that have passed through the Bi-Encoder Retrival, ReRank is p
 ```python
 # If you want to train cross encoder, you can input the configuration for the encoder
 python train.py --encoder 'cross' --output_directory './save_directory/'
+```
 
 or 
 
+```python
 python train.py --encoder 'bi' --output_directory './save_directory/'
 ```
 
