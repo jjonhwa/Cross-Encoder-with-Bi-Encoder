@@ -13,6 +13,7 @@ For Tok-k passages that have passed through the Bi-Encoder Retrival, ReRank is p
 - Actually, until ReRank Strategy was applied, **the highest performance was achieved with elastic search based on BM25.**
 - **When only biencoder was used, Retrieval accuracy was far below elastic search** in the 'KLUE MRC competition'
 - Retrieval Accuracy in our Data
+
 ||Top-5|Top-50|Top-100|
 |---|---|---|---|
 |Elastic Search|0.852|0.945|0.962|
@@ -22,6 +23,7 @@ For Tok-k passages that have passed through the Bi-Encoder Retrival, ReRank is p
 - Our purpose is to bring high performance from KLUE MRC competition to End-to-End from Retrieval to Reader. From this, **the ReRank strategy using Cross Encoder was used.**
 - After extracting the Retrival Passage of the Top-500 using the Bi-Encoder, **only a small number of Passages are finally extracted by returning to the Cross Encoder.**
 - Retrieval Accuracy in our Data
+
 ||Top-5|Top-50|Top-100|
 |---|---|---|---|
 |Elastic Search|0.852|0.945|0.962|
@@ -33,6 +35,7 @@ For Tok-k passages that have passed through the Bi-Encoder Retrival, ReRank is p
 - Top-100 was selected using Elastic Search and Top-100 was selected using DPR and Cross Encoder, and the final output score was calculated by combining them 1 to 1 and normalizing them.
 - When the final Reader model was tested, when Top-5 was input, the performance was the best, so the experiment was conducted after limiting the number of passages to be returned to five.
 - **Actually, the performance has improved significantly, and the retrival accuracy is as follows.**
+
 ||Top-5|Top-50|Top-100|
 |---|---|---|---|
 |Elastic Search|0.852|0.945|0.962|
