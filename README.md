@@ -1,6 +1,53 @@
 # Cross-Encoder-with-Bi-Encoder
 For Tok-k passages that have passed through the Bi-Encoder Retrival, ReRank is performed using CrossEncoder.
 
+## Data
+**Data used by "Open-Domain Question Answering Competition" hosted by Aistages, and copyrights can be used under CC-BY-2.0.**
+
++- data  
+|   +- train_dataset
+    |   +- train
+        |   +- dataset.arrow
+        |   +- dataset_info.json
+        |   +- indices.arrow
+        |   +- state.json
+    |   +- validataion
+        |   +- dataset.arrow
+        |   +- dataset_info.json
+        |   +- indices.arrow
+        |   +- state.json
+    |   +- dataset_dict.json
+|   +- test_dataset
+    |   +- validation
+        |   +- dataset.arrow
+        |   +- dataset_info.json
+        |   +- indices.arrow
+        |   +- state.json
+    |   +- dataset_dict.json
+|   +- wikipedia_documents.json
+
+## Setup
+### Dependencies
+- `datasets==1.5.0`
+- `transformers==4.5.0`
+- `tqdm==4.41.1`
+- `pandas==1.1.4`
+- `scikit-learn==0.24.1`
+- `konlpy==0.5.2`
+- `CUDA==11.0`
+
+### Install Requirements
+```python
+bash install_requirements.sh
+```
+
+### Hardware
+- `GPU : Tesla V100 (32GB)`
+
+### Checkpoint
+- You can check the code in the Colab environment using Demo.
+- It does not work in Colab Basic.
+
 ## What can we do to improve the performance of Retriever?
 ### 1. Explore the data set production process.
 - **Sparse Embedding may be better in tasks for viewing Passage and creating a question (if there is an annotation bias), such as SQuAD.**
@@ -19,8 +66,9 @@ For Tok-k passages that have passed through the Bi-Encoder Retrival, ReRank is p
 |Elastic Search|0.852|0.945|0.962|
 |DPR Bi-Encoder|-|0.775|0.85|
 
-### 3. **ReRank Strategy with CrossEncoder**
+### 3. **ReRank Strategy with CrossEncoder (In-Batch_Negative Samples)**
 - Our purpose is to bring high performance from KLUE MRC competition to End-to-End from Retrieval to Reader. From this, **the ReRank strategy using Cross Encoder was used.**
+- In addition, when implementing Cross Encoder, **the key point is to extract a negative sample within Batch and use it to calculate loss.**
 - After extracting the Retrival Passage of the Top-500 using the Bi-Encoder, **only a small number of Passages are finally extracted by returning to the Cross Encoder.**
 - Retrieval Accuracy in our Data
 
