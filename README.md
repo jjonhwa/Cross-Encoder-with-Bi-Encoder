@@ -34,8 +34,6 @@ For Tok-k passages that have passed through the Bi-Encoder Retrival, ReRank is p
 - `transformers==4.5.0`
 - `tqdm==4.41.1`
 - `pandas==1.1.4`
-- `scikit-learn==0.24.1`
-- `konlpy==0.5.2`
 - `CUDA==11.0`
 
 ### Install Requirements
