@@ -28,6 +28,12 @@ For Tok-k passages that have passed through the Bi-Encoder Retrival, ReRank is p
 |   +- wikipedia_documents.json  
 ```
 
+- wikipedia data는 위의 폴더 위치에 업로드하여 활용할 수 있다.
+```
+% cd /content/Cross-Encoder-with-Bi-Encoder/_data
+!gdown --id 1O-kxt4DupOibNhkwmg3luTLt07faRgvO # wiki data upload
+```
+
 ## Setup
 ### Dependencies
 - `datasets==1.5.0`
