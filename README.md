@@ -121,6 +121,6 @@ python rerank.py --input_directory './save_directory/'
 
 ## Run Retriever Demo
 - Top 500 Passages are Retrieved from about 60000 data using Biencoder, and Top 5 is finally retrieved using CrossEncoder.
-- Passage Embedding about wiki data, Cross Encoder and Bi-Encoder can be downloaded and utilized, but the data used for learning and raw wiki data cannot be disclosed, so you can understand the process through Demo and modify it to suit your data.
+- Passage Embedding about wiki data, Cross Encoder and Bi-Encoder can be downloaded and utilized
 - [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1qkVMPM8Hw8n4gGs2_-Wacp8oKMVvAokS?usp=sharing)
 
