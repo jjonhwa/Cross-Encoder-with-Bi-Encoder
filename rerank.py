@@ -181,19 +181,20 @@ if __name__ == "__main__":
     tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
 
     # Bi-Encoder Retrieval (First Scoring)
-    biencoder_retrieval = Retrieve_By_BiEncoder(
-        p_encoder, q_encoder, wiki_path, tokenizer
-    )  # get corpus & p_embs
+    corpus = get_corpus(wiki_path, p_encoder)
+    p_embs = get_p_embs(wiki_path, p_encoder, tokenizer)
 
-    corpus = biencoder_retrieval.corpus
-    dataset = load_from_disk(os.path.join(
-        sub_args.input_data, 'train_dataset'))
+    dataset = load_from_disk(os.path.join(sub_args.input_data, 'train_dataset'))
     queries = dataset["validation"]["question"]
     # dataset has valid/train data and We will calculate the score for the validation set.
     # put in your data path, dataset have train/valid dataset
+    
+    # delete p_encoder
+    p_encoder.to('cpu')
+    del p_encoder
+    torch.cuda.empty_cache()
 
-
-    doc_scores, doc_indices = biencoder_retrieval.get_relavant_doc(queries, k=500)
+    doc_scores, doc_indices = get_relavant_doc(q_encoder, tokenizer, queries, p_embs, k=500)
     # k usually utilizes 20, 50, and 100, and since this code will re-rank it with a cross encoder,
     # 500 was given to obtain the highest retrival acc.
     # (It may be larger than 500, but it consumes considerable resources when passing through the cross encoder.)
