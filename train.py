@@ -3,6 +3,7 @@ import numpy as np
 import random
 import torch.nn.functional as F
 import argparse
+import os
 
 from tqdm import trange
 from tqdm.auto import tqdm
@@ -14,8 +15,7 @@ from transformers import (
     TrainingArguments,
 )
 
-from datasets import load_from_dist
-
+from datasets import load_from_disk
 from torch.utils.data import DataLoader
 
 from dataset import (
@@ -73,21 +73,25 @@ def biencoder_train(
              that simply cut passage into max_length, use False.
     """
     if overflow == True:
-        biencoder_dataset = BiEncoder_Dataset_Overflow(queries, passages, tokenizer)
+        overflow_biencoder = BiEncoder_Dataset_Overflow(
+            queries, passages, tokenizer)
+        biencoder_dataset = overflow_biencoder._return_train_dataset()
     else:
-        biencoder_dataset = BiEncoder_Dataset_Original(queries, passages, tokenizer)
+        overflow_biencoder = BiEncoder_Dataset_Original(
+            queries, passages, tokenizer)
+        biencoder_dataset = overflow_biencoder._return_train_dataset()
 
     if sampler is not None:
-        sampler = sampler(train_dataset, args.per_device_train_batch_size)
+        sampler = sampler(biencoder_dataset, args.per_device_train_batch_size)
         train_dataloader = DataLoader(
-            train_dataset,
+            biencoder_dataset,
             batch_size=args.per_device_train_batch_size,
             sampler=sampler,
             drop_last=True,
         )
     else:
         train_dataloader = DataLoader(
-            train_dataset,
+            biencoder_dataset,
             batch_size=args.per_device_train_batch_size,
             shuffle=True,
             drop_last=True,
@@ -95,38 +99,14 @@ def biencoder_train(
 
     no_decay = ["bias", "LayerNorm.weight"]
     optimizer_grouped_parameters = [
-        {
-            "params": [
-                p
-                for n, p in p_encoder.named_parameters()
-                if not any(nd in n for nd in no_decay)
-            ],
-            "weight_decay": args.weight_decay,
-        },
-        {
-            "params": [
-                p
-                for n, p in p_encoder.named_parameters()
-                if any(nd in n for nd in no_decay)
-            ],
-            "weight_decay": 0.0,
-        },
-        {
-            "params": [
-                p
-                for n, p in q_encoder.named_parameters()
-                if not any(nd in n for nd in no_decay)
-            ],
-            "weight_decay": args.weight_decay,
-        },
-        {
-            "params": [
-                p
-                for n, p in q_encoder.named_parameters()
-                if any(nd in n for nd in no_decay)
-            ],
-            "weight_decay": 0.0,
-        },
+        {"params": [p for n, p in p_encoder.named_parameters() if not any(
+            nd in n for nd in no_decay)], "weight_decay": args.weight_decay},
+        {"params": [p for n, p in p_encoder.named_parameters() if any(
+            nd in n for nd in no_decay)], "weight_decay": 0.0},
+        {"params": [p for n, p in q_encoder.named_parameters() if not any(
+            nd in n for nd in no_decay)], "weight_decay": args.weight_decay},
+        {"params": [p for n, p in q_encoder.named_parameters() if any(
+            nd in n for nd in no_decay)], "weight_decay": 0.0}
     ]
     optimizer = AdamW(
         optimizer_grouped_parameters,
@@ -142,8 +122,6 @@ def biencoder_train(
     scheduler = get_linear_schedule_with_warmup(
         optimizer, num_warmup_steps=args.warmup_steps, num_training_steps=t_total
     )
-
-    global_step = 0
 
     p_encoder.zero_grad()
     q_encoder.zero_grad()
@@ -343,11 +321,12 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
             change_cross_inputs = {
                 "input_ids": new_input_ids,
                 "attention_mask": new_attention_mask,
-                #'token_type_ids' : new_token_type_ids # When you use BertModel, Unannotate it
+                # 'token_type_ids' : new_token_type_ids # When you use BertModel, Unannotate it
             }
 
             cross_output = cross_encoder(**change_cross_inputs)
-            cross_output = cross_output.view(-1, args.per_device_train_batch_size)
+            cross_output = cross_output.view(-1,
+                                             args.per_device_train_batch_size)
             targets = torch.arange(0, args.per_device_train_batch_size).long()
 
             if torch.cuda.is_available():
@@ -385,31 +364,38 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--encoder', type = str, default = 'cross', help = 'Biencoder can be used as the instruction "bi" and crossencoder can be used as the instruction "cross".')
-    parser.add_argument('--output_directory', type = str, default = './save_directory/', help = 'Put in your save directory')
+    parser.add_argument('--encoder', type=str, default='cross',
+                        help='Biencoder can be used as the instruction "bi" and crossencoder can be used as the instruction "cross".')
+    parser.add_argument('--output_directory', type=str,
+                        default='./save_directory/', help='Put in your save directory')
+    parser.add_argument('--input_directory', type=str, default='./_data/',
+                        help='Enter input_directory containing Encoder.')
+    parser.add_argument('--model', type=str, default='klue/bert-base',
+                        help='You can insert "klue/bert-base" or "klue/roberta-base" or "klue/roberta-base"')
     sub_args = parser.parse_args()
 
     args = TrainingArguments(
-        output_dir= sub_args.output_directory,
+        output_dir=sub_args.output_directory,
         evaluation_strategy="epoch",
         learning_rate=1e-5,
-        per_device_train_batch_size=4,  # if you use bi-encoder, More batch size may be input than crossencoder.
+        # if you use bi-encoder, More batch size may be input than crossencoder.
+        per_device_train_batch_size=4,
         gradient_accumulation_steps=1,
-        num_train_epochs=20,
+        num_train_epochs=1,
         weight_decay=0.01,
     )
-    
+
     set_seed(42)  # magic number :)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    dataset = load_from_dist(
-        "your_dataset_path"
+    dataset = load_from_disk(
+        os.path.join(sub_args.input_directory, 'train_dataset')
     )  # put in your data path, dataset have train/valid dataset
     train_dataset = dataset["train"]
 
     if sub_args.encoder == "cross":
         # you can use 'klue/bert-base' model, and you have to change the code above.
-        model_checkpoint = "klue/bert-base"
+        model_checkpoint = sub_args.model
 
         if model_checkpoint.split("/")[1].split("-")[0] == "roberta":
             tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
@@ -436,15 +422,16 @@ if __name__ == "__main__":
 
         torch.save(
             c_encoder, os.path.join(sub_args.output_directory, 'c_encoder.pt')
-        ) 
+        )
 
     elif sub_args.encoder == "bi":
-        # you can use 'klue/bert-base' or 'klue/roberta-large(base)'
-        # but, in this code, you just can use 'klue/bert-base' in bi-encoder because I jsut make bertmodel in bi-encoder
-        model_checkpoint = "klue/bert-base"
+        # in this code, you just can use 'klue/bert-base' in bi-encoder because I jsut make bertmodel in bi-encoder
+        model_checkpoint = sub_args.model
         tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
-        passage_encoder = BertEncoder_For_BiEncoder.from_pretrained(model_checkpoint)
-        question_encoder = BertEncoder_For_BiEncoder.from_pretrained(model_checkpoint)
+        passage_encoder = BertEncoder_For_BiEncoder.from_pretrained(
+            model_checkpoint)
+        question_encoder = BertEncoder_For_BiEncoder.from_pretrained(
+            model_checkpoint)
 
         if torch.cuda.is_available():
             passage_encoder = passage_encoder.to("cuda")
@@ -460,10 +447,10 @@ if __name__ == "__main__":
             sampler=CustomSampler,
             overflow=True,
         )
-        
+
         torch.save(
             p_encoder, os.path.join(sub_args.output_directory, 'p_encoder.pt')
-        )  
+        )
         torch.save(
             q_encoder, os.path.join(sub_args.output_directory, 'q_encoder.pt')
-        )  
+        )
