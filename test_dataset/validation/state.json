@@ -1,0 +1,33 @@
+{
+  "_data": null,
+  "_data_files": [
+    {
+      "filename": "dataset.arrow"
+    }
+  ],
+  "_fingerprint": "1d44e48921d9a4c2",
+  "_format_columns": [
+    "title",
+    "context",
+    "question",
+    "id",
+    "answers",
+    "__index_level_0__"
+  ],
+  "_format_kwargs": {},
+  "_format_type": null,
+  "_indexes": {},
+  "_indices": null,
+  "_indices_data_files": [
+    {
+      "filename": "indices.arrow"
+    }
+  ],
+  "_inplace_history": [
+    {
+      "transforms": []
+    }
+  ],
+  "_output_all_columns": false,
+  "_split": null
+}
