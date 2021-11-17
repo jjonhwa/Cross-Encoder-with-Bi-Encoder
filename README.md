@@ -5,26 +5,26 @@ For Tok-k passages that have passed through the Bi-Encoder Retrival, ReRank is p
 **Data used by "Open-Domain Question Answering Competition" hosted by Aistages, and copyrights can be used under CC-BY-2.0.**
 
 +- data  
-|   +- train_dataset
-    |   +- train
-        |   +- dataset.arrow
-        |   +- dataset_info.json
-        |   +- indices.arrow
-        |   +- state.json
-    |   +- validataion
-        |   +- dataset.arrow
-        |   +- dataset_info.json
-        |   +- indices.arrow
-        |   +- state.json
-    |   +- dataset_dict.json
-|   +- test_dataset
-    |   +- validation
-        |   +- dataset.arrow
-        |   +- dataset_info.json
-        |   +- indices.arrow
-        |   +- state.json
-    |   +- dataset_dict.json
-|   +- wikipedia_documents.json
+|   +- train_dataset  
+    |   +- train  
+        |   +- dataset.arrow  
+        |   +- dataset_info.json  
+        |   +- indices.arrow  
+        |   +- state.json  
+    |   +- validataion  
+        |   +- dataset.arrow  
+        |   +- dataset_info.json  
+        |   +- indices.arrow  
+        |   +- state.json  
+    |   +- dataset_dict.json  
+|   +- test_dataset  
+    |   +- validation  
+        |   +- dataset.arrow  
+        |   +- dataset_info.json  
+        |   +- indices.arrow  
+        |   +- state.json  
+    |   +- dataset_dict.json  
+|   +- wikipedia_documents.json  
 
 ## Setup
 ### Dependencies
