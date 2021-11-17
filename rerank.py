@@ -1,6 +1,7 @@
 import torch
 import os
 import pandas as pd
+import argparse
 
 from tqdm import tqdm
 from datasets import load_from_disk
@@ -167,7 +168,7 @@ if __name__ == "__main__":
     BertEncoder = BertEncoder_For_BiEncoder
     p_encoder = torch.load(os.path.join(sub_args.input_directory, 'p_encoder.pt'))
     q_encoder = torch.load(os.path.join(sub_args.input_directory, 'q_encoder.pt'))
-    wiki_path = os.path.join(sub_args.input_directory, 'wiki_data.json')
+    wiki_path = './_data/wikipedia_documents.json'
 
     model_checkpoint = "klue/bert-base"
     tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
@@ -179,10 +180,9 @@ if __name__ == "__main__":
 
     corpus = biencoder_retrieval.corpus
     dataset = load_from_disk("your_dataset_path")
-    queries = dataset["validation"][
-        "question"
-    ]  # dataset has valid/train data and We will calculate the score for the validation set.
-       # put in your data path, dataset have train/valid dataset
+    queries = dataset["validation"]["question"]  
+    # dataset has valid/train data and We will calculate the score for the validation set.
+    # put in your data path, dataset have train/valid dataset
        
     doc_scores, doc_indices = biencoder_retrieval.get_relavant_doc(queries, k=500)
     # k usually utilizes 20, 50, and 100, and since this code will re-rank it with a cross encoder,
