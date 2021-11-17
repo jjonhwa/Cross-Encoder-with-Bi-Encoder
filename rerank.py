@@ -14,14 +14,15 @@ from encoder import BertEncoder_For_BiEncoder, RoBertaEncoder_For_CrossEncoder
 class Retrieve_By_BiEncoder:
     def __init__(self, p_encoder, q_encoder, wiki_path, tokenizer):
         self.p_encoder = p_encoder
-        self.q_enocder = q_encoder
+        self.q_encoder = q_encoder
         self.wiki_path = wiki_path
         self.tokenizer = tokenizer
 
-        self.corpus = Passage_Embedding(wiki_path, p_encoder).corpus
+        passage_embedding = Passage_Embedding(wiki_path, p_encoder)
+        self.corpus = passage_embedding.corpus
         # Acquiring passage embedding can take a while (based on about 10-20 minutes, 60000 corpus),
         #  and if you want to shorten the time, it is recommended to save passage embedding as a bin file and bring it in and use it.
-        self.p_embs = Passage_Embedding.get_passage_embedding(tokenizer)
+        self.p_embs = passage_embedding.get_passage_embedding(tokenizer)
 
     def get_relavant_doc(self, queries, k=1):
         with torch.no_grad():
@@ -125,10 +126,12 @@ def rerank(queries, c_encoder, doc_indices):
                         tokenized_examples["input_ids"][i].unsqueeze(dim=0)
                     )
                     attention_mask = torch.tensor(
-                        tokenized_examples["attention_mask"][i].unsqueeze(dim=0)
+                        tokenized_examples["attention_mask"][i].unsqueeze(
+                            dim=0)
                     )
                     token_type_ids = torch.tensor(
-                        tokenized_examples["token_type_ids"][i].unsqueeze(dim=0)
+                        tokenized_examples["token_type_ids"][i].unsqueeze(
+                            dim=0)
                     )
 
                     if torch.cuda.is_avaliable():
@@ -150,7 +153,8 @@ def rerank(queries, c_encoder, doc_indices):
                 score = score / len(tokenized_examples["input_ids"])
                 question_score.append(score)
 
-            sort_result = torch.sort(torch.tensor(question_score), descending=True)
+            sort_result = torch.sort(torch.tensor(
+                question_score), descending=True)
             scores, index_list = sort_result[0], sort_result[1]
 
             result_scores.append(scores.tolist())
@@ -161,13 +165,18 @@ def rerank(queries, c_encoder, doc_indices):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input_directory', type = str, default = './save_directory/', help = 'Enter input_directory containing Encoder.')
+    parser.add_argument('--input_directory', type=str, default='./save_directory/',
+                        help='Enter input_directory containing Encoder.')
+    parser.add_argument('--input_data', type=str, default='./_data/',
+                        help='Enter input_directory containing Encoder.')
     sub_args = parser.parse_args()
 
     # q_encoder & p_encoder are called only when BertEncoder is defined.
     BertEncoder = BertEncoder_For_BiEncoder
-    p_encoder = torch.load(os.path.join(sub_args.input_directory, 'p_encoder.pt'))
-    q_encoder = torch.load(os.path.join(sub_args.input_directory, 'q_encoder.pt'))
+    p_encoder = torch.load(os.path.join(
+        sub_args.input_directory, 'p_encoder.pt'))
+    q_encoder = torch.load(os.path.join(
+        sub_args.input_directory, 'q_encoder.pt'))
     wiki_path = './_data/wikipedia_documents.json'
 
     model_checkpoint = "klue/bert-base"
@@ -179,11 +188,12 @@ if __name__ == "__main__":
     )  # get corpus & p_embs
 
     corpus = biencoder_retrieval.corpus
-    dataset = load_from_disk("your_dataset_path")
-    queries = dataset["validation"]["question"]  
+    dataset = load_from_disk(os.path.join(
+        sub_args.input_data, 'train_dataset'))
+    queries = dataset["validation"]["question"]
     # dataset has valid/train data and We will calculate the score for the validation set.
     # put in your data path, dataset have train/valid dataset
-       
+
     doc_scores, doc_indices = biencoder_retrieval.get_relavant_doc(queries, k=500)
     # k usually utilizes 20, 50, and 100, and since this code will re-rank it with a cross encoder,
     # 500 was given to obtain the highest retrival acc.
