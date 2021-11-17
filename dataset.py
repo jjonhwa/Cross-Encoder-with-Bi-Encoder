@@ -97,6 +97,27 @@ class BiEncoder_Dataset_Overflow(Dataset):
                 for k in q_seqs.keys():
                     q_seqs[k] = q_seqs[k].tolist()
                     p_seqs[k] = p_seqs[k].tolist()
+
+                initial_p_seqs_length = len(p_seqs['input_ids'])
+                for j in range(len(p_seqs['input_ids'])):
+                    q_seqs['input_ids'].append(q_seqs['input_ids'][0])
+                    q_seqs['token_type_ids'].append(
+                        q_seqs['token_type_ids'][0])
+                    q_seqs['attention_mask'].append(
+                        q_seqs['attention_mask'][0])
+                    p_seqs['input_ids'].append(p_seqs['input_ids'][j])
+                    p_seqs['token_type_ids'].append(
+                        p_seqs['token_type_ids'][j])
+                    p_seqs['attention_mask'].append(
+                        p_seqs['attention_mask'][j])
+
+                q_seqs['input_ids'] = q_seqs['input_ids'][1:]
+                q_seqs['token_type_ids'] = q_seqs['token_type_ids'][1:]
+                q_seqs['attention_mask'] = q_seqs['attention_mask'][1:]
+                p_seqs['input_ids'] = p_seqs['input_ids'][initial_p_seqs_length:]
+                p_seqs['token_type_ids'] = p_seqs['token_type_ids'][initial_p_seqs_length:]
+                p_seqs['attention_mask'] = p_seqs['attention_mask'][initial_p_seqs_length:]
+
             else:
                 tmp_q_seq = self.tokenizer(
                     self.queries[i],
@@ -123,11 +144,15 @@ class BiEncoder_Dataset_Overflow(Dataset):
 
                 for j in range(len(tmp_p_seq["input_ids"])):
                     q_seqs["input_ids"].append(tmp_q_seq["input_ids"][0])
-                    q_seqs["token_type_ids"].append(tmp_q_seq["token_type_ids"][0])
-                    q_seqs["attention_mask"].append(tmp_q_seq["attention_mask"][0])
+                    q_seqs["token_type_ids"].append(
+                        tmp_q_seq["token_type_ids"][0])
+                    q_seqs["attention_mask"].append(
+                        tmp_q_seq["attention_mask"][0])
                     p_seqs["input_ids"].append(tmp_p_seq["input_ids"][j])
-                    p_seqs["token_type_ids"].append(tmp_p_seq["token_type_ids"][j])
-                    p_seqs["attention_mask"].append(tmp_p_seq["attention_mask"][j])
+                    p_seqs["token_type_ids"].append(
+                        tmp_p_seq["token_type_ids"][j])
+                    p_seqs["attention_mask"].append(
+                        tmp_p_seq["attention_mask"][j])
 
         for k in q_seqs.keys():
             q_seqs[k] = torch.tensor(q_seqs[k])
@@ -136,9 +161,11 @@ class BiEncoder_Dataset_Overflow(Dataset):
         train_dataset = TensorDataset(
             p_seqs["input_ids"],
             p_seqs["attention_mask"],
+            # If you use the roberta model, annotate 'token_type_ids'.
             p_seqs["token_type_ids"],
             q_seqs["input_ids"],
             q_seqs["attention_mask"],
+            # If you use the roberta model, annotate 'token_type_ids'.
             q_seqs["token_type_ids"],
         )
         return train_dataset
