@@ -4,6 +4,7 @@ For Tok-k passages that have passed through the Bi-Encoder Retrival, ReRank is p
 ## Data
 **Data used by "Open-Domain Question Answering Competition" hosted by Aistages, and copyrights can be used under CC-BY-2.0.**
 
+```
 +- data  
 |   +- train_dataset  
     |   +- train  
@@ -25,6 +26,7 @@ For Tok-k passages that have passed through the Bi-Encoder Retrival, ReRank is p
         |   +- state.json  
     |   +- dataset_dict.json  
 |   +- wikipedia_documents.json  
+```
 
 ## Setup
 ### Dependencies
