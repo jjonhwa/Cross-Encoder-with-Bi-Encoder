@@ -10,44 +10,42 @@ from transformers import AutoTokenizer
 from utils import Passage_Embedding
 from encoder import BertEncoder_For_BiEncoder, RoBertaEncoder_For_CrossEncoder
 
+def get_corpus(wiki_path, p_encoder) :
+    passage_embedding = Passage_Embedding(wiki_path, p_encoder)
+    corpus = passage_embedding.corpus
 
-class Retrieve_By_BiEncoder:
-    def __init__(self, p_encoder, q_encoder, wiki_path, tokenizer):
-        self.p_encoder = p_encoder
-        self.q_encoder = q_encoder
-        self.wiki_path = wiki_path
-        self.tokenizer = tokenizer
+    return corpus
+    
+def get_p_embs(wiki_path, p_encoder, tokenizer) :
+    passage_embedding = Passage_Embedding(wiki_path, p_encoder)
+    p_embs = passage_embedding.get_passage_embedding(tokenizer)
+    
+    return p_embs
 
-        passage_embedding = Passage_Embedding(wiki_path, p_encoder)
-        self.corpus = passage_embedding.corpus
-        # Acquiring passage embedding can take a while (based on about 10-20 minutes, 60000 corpus),
-        #  and if you want to shorten the time, it is recommended to save passage embedding as a bin file and bring it in and use it.
-        self.p_embs = passage_embedding.get_passage_embedding(tokenizer)
 
-    def get_relavant_doc(self, queries, k=1):
-        with torch.no_grad():
-            self.q_encoder.eval()
-            q_seqs_val = self.tokenizer(
-                queries, padding="max_length", truncation=True, return_tensors="pt"
-            )
+def get_relavant_doc(q_encoder, tokenizer, queries, p_embs, k=1):
+    with torch.no_grad():
+        q_encoder.eval()
+        q_seqs_val = tokenizer(
+            queries, padding="max_length", truncation=True, return_tensors="pt"
+        )
 
-            if torch.cuda.is_available():
-                q_seqs_val = q_seqs_val.to("cuda")
-            q_emb = self.q_encoder(**q_seqs_val).to("cpu")
+        if torch.cuda.is_available():
+            q_seqs_val = q_seqs_val.to("cuda")
+        q_emb = q_encoder(**q_seqs_val).to("cpu")
 
-        dot_prod_scores = torch.mm(q_emb, self.p_embs.T)
-        sort_result = torch.sort(dot_prod_scores, dim=1, descending=True)
+    dot_prod_scores = torch.mm(q_emb, p_embs.T)
+    sort_result = torch.sort(dot_prod_scores, dim=1, descending=True)
 
-        scores, ranks = sort_result[0], sort_result[1]
+    scores, ranks = sort_result[0], sort_result[1]
 
-        result_scores = []
-        result_indices = []
-        for i in range(len(ranks)):
-            result_scores.append(scores[i].tolist()[:k])
-            result_indices.append(ranks[i].tolist()[:k])
+    result_scores = []
+    result_indices = []
+    for i in range(len(ranks)):
+        result_scores.append(scores[i].tolist()[:k])
+        result_indices.append(ranks[i].tolist()[:k])
 
-        return result_scores, result_indices
-
+    return result_scores, result_indices
 
 def get_retrieval_acc(dataset, corpus, doc_indices):
     """
@@ -193,6 +191,7 @@ if __name__ == "__main__":
     queries = dataset["validation"]["question"]
     # dataset has valid/train data and We will calculate the score for the validation set.
     # put in your data path, dataset have train/valid dataset
+
 
     doc_scores, doc_indices = biencoder_retrieval.get_relavant_doc(queries, k=500)
     # k usually utilizes 20, 50, and 100, and since this code will re-rank it with a cross encoder,
