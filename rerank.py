@@ -83,7 +83,7 @@ def get_retrieval_acc(dataset, corpus, doc_indices):
     return len(correct_length) / len(dataset)
 
 
-def rerank(queries, c_encoder, doc_indices):
+def rerank(queries, c_encoder, doc_indices, corpus, tokenizer):
     """
     Passage returned from the bi-encoder is re-ranked using the cross encoder.
 
@@ -209,7 +209,7 @@ if __name__ == "__main__":
     # (In this process, RobertaEncoder is defined because c_encoder using Roberta is called. If a c_encoder using abert is called, then a BertEncoder is defined.)
     RoBertaEncoder = RoBertaEncoder_For_CrossEncoder
     c_encoder = torch.load(os.path.join(sub_args.input_directory, "c_encoder.pt"))
-    result_scores, result_indices = rerank(queries, c_encoder, doc_indices)
+    result_scores, result_indices = rerank(queries, c_encoder, doc_indices, corpus, tokenizer)
 
     # get final Top-k Passages: Here, I just get 50 passage
     final_indices = []
