@@ -132,7 +132,7 @@ def rerank(queries, c_encoder, doc_indices):
                             dim=0)
                     )
 
-                    if torch.cuda.is_avaliable():
+                    if torch.cuda.is_available():
                         input_ids = input_ids.to("cuda")
                         attention_mask = attention_mask.to("cuda")
                         token_type_ids = token_type_ids.to("cuda")
