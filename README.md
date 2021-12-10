@@ -1,7 +1,6 @@
-# Cross-Encoder-with-Bi-Encoder
+# Cross-Encoder-with-Bi-Encoder <a href="https://github.com/jjonhwa/Retrieval_Streamlit_Demo" target="_blank"><img src="https://img.shields.io/badge/-WebDemo-critical?style=plastic&logo=#00ED00&logoColor=57B118"/></a>
 
 For Tok-k passages that have passed through the Bi-Encoder Retrival, ReRank is performed using CrossEncoder.
-<a href="https://github.com/jjonhwa/Retrieval_Streamlit_Demo" target="_blank"><img src="https://img.shields.io/badge/-WebDemo-critical?style=plastic&logo=#00ED00&logoColor=57B118"/></a>
 
 ## Data
 
@@ -142,4 +141,3 @@ python rerank.py --input_directory './save_directory/'
 - Top 500 Passages are Retrieved from about 60000 data using Biencoder, and Top 5 is finally retrieved using CrossEncoder.
 - Passage Embedding about wiki data, Cross Encoder and Bi-Encoder can be downloaded and utilized
 - [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1qkVMPM8Hw8n4gGs2_-Wacp8oKMVvAokS?usp=sharing)
-- [Streamlit WebDemo](https://github.com/jjonhwa/Retrieval_Streamlit_Demo)
