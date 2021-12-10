@@ -1,6 +1,7 @@
 # Cross-Encoder-with-Bi-Encoder
 
 For Tok-k passages that have passed through the Bi-Encoder Retrival, ReRank is performed using CrossEncoder.
+<a href="https://github.com/jjonhwa/Retrieval_Streamlit_Demo" target="_blank"><img src="https://img.shields.io/badge/-WebDemo-critical?style=plastic&logo=#00ED00&logoColor=57B118"/></a>
 
 ## Data
 
