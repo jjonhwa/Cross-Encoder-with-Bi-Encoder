@@ -319,8 +319,8 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
                 # 'token_type_ids' : new_token_type_ids # When you use BertModel, Unannotate it
             }
 
-            cross_output = cross_encoder(**change_cross_inputs)
-            cross_output = cross_output.view(-1, args.per_device_train_batch_size)
+            cross_output = cross_encoder(**change_cross_inputs) 
+            cross_output = cross_output.view(-1, args.per_device_train_batch_size) # (batch_size, emb_dim)
             
             # only i_th element is accepted as positive
             targets = torch.arange(0, args.per_device_train_batch_size).long()
