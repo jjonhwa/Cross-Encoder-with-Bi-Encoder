@@ -131,7 +131,7 @@ def biencoder_train(
     p_encoder.train()
     for epoch, _ in enumerate(train_iterator):
         epoch_iterator = tqdm(train_dataloader, desc="Iteration")
-        loss_value = 0  # Accumulation할 때 진행
+        loss_value = 0  # Use it when you use accumulation.
         losses = 0
         for step, batch in enumerate(epoch_iterator):
             if torch.cuda.is_available():
@@ -235,22 +235,10 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
 
     no_decay = ["bias", "LayerNorm.weight"]
     optimizer_grouped_parameters = [
-        {
-            "params": [
-                p
-                for n, p in cross_encoder.named_parameters()
-                if not any(nd in n for nd in no_decay)
-            ],
-            "weight_decay": args.weight_decay,
-        },
-        {
-            "params": [
-                p
-                for n, p in cross_encoder.named_parameters()
-                if any(nd in n for nd in no_decay)
-            ],
-            "weight_decay": 0.0,
-        },
+        {"params": [p for n, p in cross_encoder.named_parameters() if not any(
+            nd in n for nd in no_decay)], "weight_decay": args.weight_decay},
+        {"params": [p for n, p in cross_encoder.named_parameters() if any(
+            nd in n for nd in no_decay)], "weight_decay": 0.0},
     ]
     optimizer = AdamW(
         optimizer_grouped_parameters,
@@ -263,6 +251,7 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
         // args.gradient_accumulation_steps
         * args.num_train_epochs
     )
+    
     scheduler = get_linear_schedule_with_warmup(
         optimizer, num_warmup_steps=args.warmup_steps, num_training_steps=t_total
     )
@@ -274,10 +263,8 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
     for epoch, _ in enumerate(train_iterator):
         epoch_iterator = tqdm(train_dataloader, desc="Iteration")
         losses = 0
+        
         for step, batch in enumerate(epoch_iterator):
-            # if torch.cuda.is_available() :
-            #     batch = tuple(t.cuda() for t in batch)
-
             cross_inputs = {
                 "input_ids": batch[0],
                 "attention_mask": batch[1],
@@ -286,16 +273,21 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
             for k in cross_inputs.keys():
                 cross_inputs[k] = cross_inputs[k].tolist()
 
-            # Make In-Batch Negative Sampling
+            # -- Make In-Batch Negative Sampling
             new_input_ids = []
             new_attention_mask = []
             # new_token_type_ids = [] # When you use BertModel, Unannotate it
+            
             for i in range(len(cross_inputs["input_ids"])):
-                sep_index = cross_inputs["input_ids"][i].index(
-                    tokenizer.sep_token_id
-                )  # [SEP] token의 index
+                sep_index = cross_inputs["input_ids"][i].index(tokenizer.sep_token_id)  # [SEP] token의 index
 
                 for j in range(len(cross_inputs["input_ids"])):
+                    
+                    # -- Make Negative Samples => i_th query with j_th passage
+                    # positive: i_th query + i_th query
+                    # negative: i_th query + j_th query
+                    # Note: Since multiple passages can be obtained for one query, the i_th query and j_th passage can be positive samples. Because of this, Sampling is performed in prepraration for this case. However, there is no significant difference in performance when shuffle is used as sampling
+                    
                     query_id = cross_inputs["input_ids"][i][:sep_index]
                     query_att = cross_inputs["attention_mask"][i][:sep_index]
                     # query_tok = cross_inputs['token_type_ids'][i][:sep_index] # When you use BertModel, Unannotate it
@@ -303,9 +295,11 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
                     context_id = cross_inputs["input_ids"][j][sep_index:]
                     context_att = cross_inputs["attention_mask"][j][sep_index:]
                     # context_tok = cross_inputs['token_type_ids'][j][sep_index:] # When you use BertModel, Unannotate it
+                    
                     query_id.extend(context_id)
                     query_att.extend(context_att)
                     # query_tok.extend(context_tok) # When you use BertModel, Unannotate it
+                    
                     new_input_ids.append(query_id)
                     new_attention_mask.append(query_att)
                     # new_token_type_ids.append(query_tok) # When you use BertModel, Unannotate it
@@ -313,6 +307,7 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
             new_input_ids = torch.tensor(new_input_ids)
             new_attention_mask = torch.tensor(new_attention_mask)
             # new_token_type_ids = torch.tensor(new_token_type_ids) # When you use BertModel, Unannotate it
+            
             if torch.cuda.is_available():
                 new_input_ids = new_input_ids.to("cuda")
                 new_attention_mask = new_attention_mask.to("cuda")
@@ -325,8 +320,9 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
             }
 
             cross_output = cross_encoder(**change_cross_inputs)
-            cross_output = cross_output.view(-1,
-                                             args.per_device_train_batch_size)
+            cross_output = cross_output.view(-1, args.per_device_train_batch_size)
+            
+            # only i_th element is accepted as positive
             targets = torch.arange(0, args.per_device_train_batch_size).long()
 
             if torch.cuda.is_available():
