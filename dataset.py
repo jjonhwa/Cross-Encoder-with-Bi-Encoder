@@ -74,85 +74,38 @@ class BiEncoder_Dataset_Overflow(Dataset):
         return len(self.queries)
 
     def _return_train_dataset(self):
-        for i in range(len(self.queries)):
-            if i == 0:
-                q_seqs = self.tokenizer(
-                    self.queries[i],
-                    padding="max_length",
-                    truncation=True,
-                    return_tensors="pt",
-                )
-                p_seqs = self.tokenizer(
-                    self.passages[i],
-                    truncation=True,
-                    stride=128,
-                    padding="max_length",
-                    return_overflowing_tokens=True,
-                    return_offsets_mapping=True,
-                    return_tensors="pt",
-                )
-                p_seqs.pop("overflow_to_sample_mapping")
-                p_seqs.pop("offset_mapping")
+        for i in range(len(queries)):
+            q_seq = tokenizer(
+                queries[i],
+                padding='max_length',
+                truncation=True,
+                return_tensors='pt'
+            )
+            p_seq=tokenizer(
+                passages[i],
+                truncation=True,
+                stride=128,
+                padding='max_length',
+                return_overflowing_tokens=True,
+                return_offsets_mapping=True,
+                return_tensors='pt'
+            )
 
-                for k in q_seqs.keys():
-                    q_seqs[k] = q_seqs[k].tolist()
-                    p_seqs[k] = p_seqs[k].tolist()
+            p_seq.pop("overflow_to_sample_mapping")
+            p_seq.pop("offset_mapping")
 
-                initial_p_seqs_length = len(p_seqs['input_ids'])
-                for j in range(len(p_seqs['input_ids'])):
-                    q_seqs['input_ids'].append(q_seqs['input_ids'][0])
-                    q_seqs['token_type_ids'].append(
-                        q_seqs['token_type_ids'][0])
-                    q_seqs['attention_mask'].append(
-                        q_seqs['attention_mask'][0])
-                    p_seqs['input_ids'].append(p_seqs['input_ids'][j])
-                    p_seqs['token_type_ids'].append(
-                        p_seqs['token_type_ids'][j])
-                    p_seqs['attention_mask'].append(
-                        p_seqs['attention_mask'][j])
+            for k in q_seq.keys():
+                q_seq[k] = q_seq[k].tolist()
+                p_seq[k] = p_seq[k].tolist()
 
-                q_seqs['input_ids'] = q_seqs['input_ids'][1:]
-                q_seqs['token_type_ids'] = q_seqs['token_type_ids'][1:]
-                q_seqs['attention_mask'] = q_seqs['attention_mask'][1:]
-                p_seqs['input_ids'] = p_seqs['input_ids'][initial_p_seqs_length:]
-                p_seqs['token_type_ids'] = p_seqs['token_type_ids'][initial_p_seqs_length:]
-                p_seqs['attention_mask'] = p_seqs['attention_mask'][initial_p_seqs_length:]
-
-            else:
-                tmp_q_seq = self.tokenizer(
-                    self.queries[i],
-                    padding="max_length",
-                    truncation=True,
-                    return_tensors="pt",
-                )
-                tmp_p_seq = self.tokenizer(
-                    self.passages[i],
-                    truncation=True,
-                    stride=128,
-                    padding="max_length",
-                    return_overflowing_tokens=True,
-                    return_offsets_mapping=True,
-                    return_tensors="pt",
-                )
-
-                tmp_p_seq.pop("overflow_to_sample_mapping")
-                tmp_p_seq.pop("offset_mapping")
-
-                for k in tmp_p_seq.keys():
-                    tmp_p_seq[k] = tmp_p_seq[k].tolist()
-                    tmp_q_seq[k] = tmp_q_seq[k].tolist()
-
-                for j in range(len(tmp_p_seq["input_ids"])):
-                    q_seqs["input_ids"].append(tmp_q_seq["input_ids"][0])
-                    q_seqs["token_type_ids"].append(
-                        tmp_q_seq["token_type_ids"][0])
-                    q_seqs["attention_mask"].append(
-                        tmp_q_seq["attention_mask"][0])
-                    p_seqs["input_ids"].append(tmp_p_seq["input_ids"][j])
-                    p_seqs["token_type_ids"].append(
-                        tmp_p_seq["token_type_ids"][j])
-                    p_seqs["attention_mask"].append(
-                        tmp_p_seq["attention_mask"][j])
+            # Add query and passage together to suit the number of cut passes
+            for j in range(len(p_seq['input_ids'])):
+                q_seqs['input_ids'].append(q_seq['input_ids'][0])
+                q_seqs['token_type_ids'].append(q_seq['token_type_ids'][0])
+                q_seqs['attention_mask'].append(q_seq['attention_mask'][0])
+                p_seqs['input_ids'].append(p_seq['input_ids'][j])
+                p_seqs['token_type_ids'].append(p_seq['token_type_ids'][j])
+                p_seqs['attention_mask'].append(p_seq['attention_mask'][j])
 
         for k in q_seqs.keys():
             q_seqs[k] = torch.tensor(q_seqs[k])
