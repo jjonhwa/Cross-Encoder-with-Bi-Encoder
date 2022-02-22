@@ -74,6 +74,14 @@ class BiEncoder_Dataset_Overflow(Dataset):
         return len(self.queries)
 
     def _return_train_dataset(self):
+        
+        q_seqs = {'input_ids': [],
+                  'token_type_ids': [],
+                  'attention_mask': []}
+        p_seqs = {'input_ids': [],
+                  'token_type_ids': [],
+                  'attention_mask': []}
+        
         for i in range(len(queries)):
             q_seq = tokenizer(
                 queries[i],
