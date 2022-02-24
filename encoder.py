@@ -105,7 +105,9 @@ class BertEncoder_For_BiEncoder(BertPreTrainedModel):
     def forward(self, input_ids, attention_mask=None, token_type_ids=None):
 
         outputs = self.bert(
-            input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids
+            input_ids,
+            attention_mask=attention_mask,
+            token_type_ids=token_type_ids
         )
 
         pooled_output = outputs[1]
