@@ -360,25 +360,33 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--encoder', type=str, default='cross',
-                        help='Biencoder can be used as the instruction "bi" and crossencoder can be used as the instruction "cross".')
-    parser.add_argument('--output_directory', type=str,
-                        default='./save_directory/', help='Put in your save directory')
-    parser.add_argument('--input_directory', type=str, default='./_data/',
-                        help='Enter input_directory containing Encoder.')
-    parser.add_argument('--model', type=str, default='klue/bert-base',
-                        help='You can insert "klue/bert-base" or "klue/roberta-base" or "klue/roberta-base"')
+    
+    # -- mode
+    parser.add_argument('--encoder', type=str, default='cross', help='Biencoder can be used as the instruction "bi" and crossencoder can be used as the instruction "cross".')
+    parser.add_argument('--model', type=str, default='klue/bert-base', help='You can insert "klue/bert-base" or "klue/roberta-base" or "klue/roberta-base"')
+
+    # -- training arguments
+    parser.add_argument('--lr', type=float, default=1e-5, help="learning rate (default: 1e-5)")
+    parser.add_argument('--train_batch_size', type=int, default=4, help="train batch size (default: 4)")
+    parser.add_argument('--epochs', type=int, default=10, help="number of epochs to train (default: 10)")
+    parser.add_argument('--weight_decay', type=float, default=0.01, help="strength of weight decay (default: 0.01)")
+    parser.add_argument('--gradient_accumulation_steps', type=int, default=1, help="gradient accumulation steps (default: 1)")
+    
+    # -- save
+    parser.add_argument('--output_directory', type=str, default='./save_directory/', help='Put in your save directory')
+    parser.add_argument('--input_directory', type=str, default='./_data/', help='Enter input_directory containing Encoder.')
+
     sub_args = parser.parse_args()
 
     args = TrainingArguments(
         output_dir=sub_args.output_directory,
         evaluation_strategy="epoch",
-        learning_rate=1e-5,
+        learning_rate=sub_args.lr,
         # if you use bi-encoder, More batch size may be input than crossencoder.
-        per_device_train_batch_size=4,
-        gradient_accumulation_steps=1,
-        num_train_epochs=1,
-        weight_decay=0.01,
+        per_device_train_batch_size=sub_args.train_batch_size,
+        gradient_accumulation_steps=sub_args.gradient_accumulation_steps,
+        num_train_epochs=sub_args.epochs,
+        weight_decay=sub_args.weight_decay,
     )
 
     set_seed(42)  # magic number :)
