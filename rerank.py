@@ -120,17 +120,9 @@ def rerank(queries, c_encoder, doc_indices, corpus, tokenizer):
                 )
                 score = 0
                 for i in range(len(tokenized_examples["input_ids"])):
-                    input_ids = torch.tensor(
-                        tokenized_examples["input_ids"][i].unsqueeze(dim=0)
-                    )
-                    attention_mask = torch.tensor(
-                        tokenized_examples["attention_mask"][i].unsqueeze(
-                            dim=0)
-                    )
-                    token_type_ids = torch.tensor(
-                        tokenized_examples["token_type_ids"][i].unsqueeze(
-                            dim=0)
-                    )
+                    input_ids = torch.tensor(tokenized_examples["input_ids"][i].unsqueeze(dim=0))
+                    attention_mask = torch.tensor(tokenized_examples["attention_mask"][i].unsqueeze(dim=0))
+                    token_type_ids = torch.tensor(tokenized_examples["token_type_ids"][i].unsqueeze(dim=0))
 
                     if torch.cuda.is_available():
                         input_ids = input_ids.to("cuda")
@@ -151,8 +143,7 @@ def rerank(queries, c_encoder, doc_indices, corpus, tokenizer):
                 score = score / len(tokenized_examples["input_ids"])
                 question_score.append(score)
 
-            sort_result = torch.sort(torch.tensor(
-                question_score), descending=True)
+            sort_result = torch.sort(torch.tensor(question_score), descending=True)
             scores, index_list = sort_result[0], sort_result[1]
 
             result_scores.append(scores.tolist())
@@ -163,18 +154,14 @@ def rerank(queries, c_encoder, doc_indices, corpus, tokenizer):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input_directory', type=str, default='./save_directory/',
-                        help='Enter input_directory containing Encoder.')
-    parser.add_argument('--input_data', type=str, default='./_data/',
-                        help='Enter input_directory containing Encoder.')
+    parser.add_argument('--input_directory', type=str, default='./save_directory/',help='Enter input_directory containing Encoder.')
+    parser.add_argument('--input_data', type=str, default='./_data/',help='Enter input_directory containing Encoder.')
     sub_args = parser.parse_args()
 
     # q_encoder & p_encoder are called only when BertEncoder is defined.
     BertEncoder = BertEncoder_For_BiEncoder
-    p_encoder = torch.load(os.path.join(
-        sub_args.input_directory, 'p_encoder.pt'))
-    q_encoder = torch.load(os.path.join(
-        sub_args.input_directory, 'q_encoder.pt'))
+    p_encoder = torch.load(os.path.join(sub_args.input_directory, 'p_encoder.pt'))
+    q_encoder = torch.load(os.path.join(sub_args.input_directory, 'q_encoder.pt'))
     wiki_path = './_data/wikipedia_documents.json'
 
     model_checkpoint = "klue/bert-base"
