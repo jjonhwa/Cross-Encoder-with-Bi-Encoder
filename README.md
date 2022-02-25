@@ -60,7 +60,7 @@ bash install_requirements.sh
 
 - `GPU : Tesla V100 (32GB)`
 
-### Checkpoint
+### Note
 
 - You can check the code in the Colab environment using Demo.
 - It does not work in Colab Basic.
