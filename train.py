@@ -287,8 +287,8 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
                 for j in range(len(cross_inputs["input_ids"])):
                     
                     # -- Make Negative Samples => i_th query with j_th passage
-                    # positive: i_th query + i_th query
-                    # negative: i_th query + j_th query
+                    # positive: i_th query + i_th passage
+                    # negative: i_th query + j_th passage
                     # Note: Since multiple passages can be obtained for one query, the i_th query and j_th passage can be positive samples. 
                     #       Because of this, Sampling is performed in prepraration for this case. However, there is no significant difference in performance when shuffle is used as sampling
                     
