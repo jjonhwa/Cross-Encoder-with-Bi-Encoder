@@ -8,15 +8,13 @@ from tqdm import tqdm
 
 class CustomSampler(Sampler):
     """
-    When creating a DataLoader, make sure
-    that three consecutive indexes do not included in one batch
+    When creating a DataLoader, make sure that three consecutive indexes do not included in one batch
 
     This CustomSampler assumes that one q-p pair is split into three.
-    If it splits more,
-    you need to modify "abs(s-f) <= 2" in the code below to fit the length
+    If it splits more, you need to modify "abs(s-f) <= 2" in the code below to fit the length
 
     you don't have to use this code
-    But, if you don't use this code, you have to insert 'shuffle=True' in your DataLoader
+    But, if you don't use this code, you have to insert 'shuffle=True' option in your DataLoader
     """
 
     def __init__(self, data_source, batch_size):
@@ -32,9 +30,7 @@ class CustomSampler(Sampler):
                 tmp_data = random.randint(0, n - 1)
                 index_list.append(tmp_data)
             for f, s in zip(index_list, index_list[1:]):
-                if (
-                    abs(s - f) <= 2
-                ):  # If splits more, modify this code like 'abs(s-f) <= 3'
+                if abs(s - f) <= 2:  # If splits more, modify this code like 'abs(s-f) <= 3'
                     out = False
             if out == True:
                 break
