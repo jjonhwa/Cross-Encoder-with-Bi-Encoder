@@ -108,6 +108,7 @@ def biencoder_train(
         {"params": [p for n, p in q_encoder.named_parameters() if any(
             nd in n for nd in no_decay)], "weight_decay": 0.0}
     ]
+    
     optimizer = AdamW(
         optimizer_grouped_parameters,
         lr=args.learning_rate,
@@ -240,6 +241,7 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
         {"params": [p for n, p in cross_encoder.named_parameters() if any(
             nd in n for nd in no_decay)], "weight_decay": 0.0},
     ]
+    
     optimizer = AdamW(
         optimizer_grouped_parameters,
         lr=args.learning_rate,
@@ -270,6 +272,7 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
                 "attention_mask": batch[1],
                 # 'token_type_ids' : batch[2] # When you use BertModel, Unannotate it
             }
+            
             for k in cross_inputs.keys():
                 cross_inputs[k] = cross_inputs[k].tolist()
 
@@ -286,7 +289,8 @@ def crossencoder_train(args, queries, passages, tokenizer, cross_encoder, sample
                     # -- Make Negative Samples => i_th query with j_th passage
                     # positive: i_th query + i_th query
                     # negative: i_th query + j_th query
-                    # Note: Since multiple passages can be obtained for one query, the i_th query and j_th passage can be positive samples. Because of this, Sampling is performed in prepraration for this case. However, there is no significant difference in performance when shuffle is used as sampling
+                    # Note: Since multiple passages can be obtained for one query, the i_th query and j_th passage can be positive samples. 
+                    #       Because of this, Sampling is performed in prepraration for this case. However, there is no significant difference in performance when shuffle is used as sampling
                     
                     query_id = cross_inputs["input_ids"][i][:sep_index]
                     query_att = cross_inputs["attention_mask"][i][:sep_index]
