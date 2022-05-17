@@ -50,17 +50,14 @@ class BiEncoder_Dataset_Overflow(Dataset):
     When the question and passage are tokenized,
      additional data is generated for sentences that are truncated with max_length,
      question and the cut passage is made into q-p pairs
-
     ex) Q: 김연아는 어느나라 사람이니?
         P: 김연아는 대한민국의 대표로서 올림픽에서 당당히 금메달을 차지했다.
         -> Q김연아는 어느나라 사람이니? / P(김연아는 대한민국의 대표로서)
         -> Q김연아는 어느나라 사람이니? / P(대표로서 올림픽에서 당당히 금메달을)
         -> Q김연아는 어느나라 사람이니? / P(금메달을 차지했다. Pad Pad Pad)
-
     In the case of Korean corpus, this code was used
      because there are many losses of information
      if the passage is tokenized and most of the tokenized passage length exceeds max_length.
-
     Return:
         Dataset format
     """
@@ -82,15 +79,15 @@ class BiEncoder_Dataset_Overflow(Dataset):
                   'token_type_ids': [],
                   'attention_mask': []}
         
-        for i in range(len(queries)):
+        for i in range(len(self.queries)):
             q_seq = tokenizer(
-                queries[i],
+                self.queries[i],
                 padding='max_length',
                 truncation=True,
                 return_tensors='pt'
             )
             p_seq=tokenizer(
-                passages[i],
+                self.passages[i],
                 truncation=True,
                 stride=128,
                 padding='max_length',
