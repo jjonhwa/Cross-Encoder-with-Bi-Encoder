@@ -119,10 +119,10 @@ def rerank(queries, c_encoder, doc_indices, corpus, tokenizer):
                     return_tensors="pt",
                 )
                 score = 0
-                for i in range(len(tokenized_examples["input_ids"])):
-                    input_ids = torch.tensor(tokenized_examples["input_ids"][i].unsqueeze(dim=0))
-                    attention_mask = torch.tensor(tokenized_examples["attention_mask"][i].unsqueeze(dim=0))
-                    token_type_ids = torch.tensor(tokenized_examples["token_type_ids"][i].unsqueeze(dim=0))
+                for j in range(len(tokenized_examples["input_ids"])):
+                    input_ids = torch.tensor(tokenized_examples["input_ids"][j].unsqueeze(dim=0))
+                    attention_mask = torch.tensor(tokenized_examples["attention_mask"][j].unsqueeze(dim=0))
+                    token_type_ids = torch.tensor(tokenized_examples["token_type_ids"][j].unsqueeze(dim=0))
 
                     if torch.cuda.is_available():
                         input_ids = input_ids.to("cuda")
