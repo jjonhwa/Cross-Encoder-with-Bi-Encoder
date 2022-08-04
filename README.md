@@ -37,7 +37,7 @@ For Tok-k passages that have passed through the Bi-Encoder Retrival, ReRank is p
 !git clone https://github.com/jjonhwa/Cross-Encoder-with-Bi-Encoder.git # git clone
 % cd ./Cross-Encoder-with-Bi-Encoder/_data                              # change directory (input your own path)
 
-!gdown --id 1O-kxt4DupOibNhkwmg3luTLt07faRgvO # wiki data upload        # download wikipedia data
+!gdown --id 1OSKOeZxVmjRWokMCNiFtpOQuFDArNINf # wiki data upload        # download wikipedia data
 ```
 
 ## Setup
@@ -137,8 +137,10 @@ python train.py --encoder 'bi' --output_directory './save_directory/'
 python rerank.py --input_directory './save_directory/'
 ```
 
+~~
 ## Run Retriever Demo
 
 - Top 500 Passages are Retrieved from about 60000 data using Biencoder, and Top 5 is finally retrieved using CrossEncoder.
 - Passage Embedding about wiki data, Cross Encoder and Bi-Encoder can be downloaded and utilized
 - [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1qkVMPM8Hw8n4gGs2_-Wacp8oKMVvAokS?usp=sharing)
+~~
